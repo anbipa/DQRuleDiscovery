@@ -1,47 +1,65 @@
 # DQRuleDiscovery Demo
-This repository contains the code for demonstrating the Data Quality Rule Discovery tool. The python notebook serves as a demo and showcases the funnctionality of discovering valid denial constraints given a dataset.
+This repository contains the code for the Data Quality Rule Discovery tool. 
 
-## Requirements
 
-Ensure you have the following installed before running the notebook:
+## Deployment Requirements
+### Enviroment Variables 
+The application currently does not require any mandatory environment variables.
 
-### Dependencies
+### Volumes & Persistent Storage
+In this initial version, our tool uses docker volumes to allow users to provide their input files and access outputs.
+- **Input Volume**: The input volume is mounted to the container's `/app/data` directory. Users can place their input files in this directory.
+- **Output Volume**: The output volume is mounted to the container's `/app/outputs` directory. The application will save its output files in this directory.
 
-This project requires the following Python libraries:
+In future versions, we plan to connect to the LTS external storage in Cyclops.
 
-- `pandas` - Data manipulation and analysis
-- `numpy` (version 2.0) - For bitwise count operations and numerical computing
+The DQRuleDiscovery application does not require any persistent storage or volumes. In this initial version, the tool reads the input data from a input.csv file located in a local specified directory. Seamasly, The output file is saved in a specified output directory.
+### Network Configuration
+The application does not require any specific network configuration. It runs locally and does not expose any ports.
+In the future, main may communicate with:
+1. (input) the LTS to retrieve the dataset to be scrutinized. 
+2. (output) the IKB to annotate the discovered DC through a provided API.
 
-### Installation
 
-To install the required dependencies, run:
+## Infrastructure Setup & Resource Allocation
+### CPU & Memory Requirements
+CPU usage is high, but can increase/decrease depending on the size of the dataset file.
 
+### Storage Considerations
+- Disk space:
+   - Base image size: ~ 350 MB
+### External Service Dependencies
+- Future: LTS and IKB services for data retrieval and annotation.
+
+### Service Scaling & Load
+- The application is designed to run on a single instance.
+
+## Security & Access Credentials
+### Authentication & Authorization 
+- The application does not require authentication or authorization mechanisms in this version.
+### TLS/SSL Requirements
+- The application does not require TLS/SSL in this version.
+
+## Repository Structure
 ```bash
-pip install pandas numpy
+├── data
+│   └── input.csv
+├── outputs
+├── src
+│   ├── main.py
+│   ├── utils.py
+│   ├── operator_predicate.py
+│   ├── denialconstraints.py
+│   └── dataset.py
+├── requirements.txt
+├── Dockerfile
+├── README.md
+├── LICENSE
+├── DQRuleDiscovery.ipynb
+└── .gitignore
 ```
 
-## Usage
-### Python Notebook 
-1. Clone the repository:
-
-   ```bash
-   git clone <repository_url>
-   cd <repository_name>
-   ```
-
-2. Open the Jupyter Notebook:
-
-   ```bash
-   jupyter notebook notebook_name.ipynb
-   ```
-
-3. Modify the dataset path as needed:
-   - Set the dataset path in the `dataset` variable.
-   - Ensure the number of rows is a multiple of 8 (preferably a power of 2).
-
-4. Run all cells to extract and analyze Denial Constraints (DCs).
-
-### Docker Setup 
+## Docker Setup Locally 
 
 To run the project inside a Docker container, you can follow these steps:
 
@@ -64,6 +82,11 @@ After building the image, run the following command to start the container. This
    - --name dq-container: Names the container for easy reference.
    - dq-discovery: The Docker image name.
 
+   
+
+## Questions / Contact
+Please reach out (aniol.bisquert@upc.edu) if you have any questions or need assistance with the DQRuleDiscovery tool.
+
 ## Notes
 
 - DCs work with tuple pairs, meaning both time and memory usage scale quadratically.
@@ -73,3 +96,4 @@ After building the image, run the following command to start the container. This
 ## License
 
 MIT.
+
