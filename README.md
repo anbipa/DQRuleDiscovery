@@ -1,4 +1,4 @@
-# DQRuleDiscovery Demo
+# DQRuleDiscovery
 This repository contains the code for the Data Quality Rule Discovery tool. 
 
 
