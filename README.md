@@ -11,19 +11,14 @@ This project requires the following Python libraries:
 
 - `pandas` - Data manipulation and analysis
 - `numpy` (version 2.0) - For bitwise count operations and numerical computing
-- `operator` - Standard Python operators as functions
-- `itertools` - Efficient looping constructs
-- `re` - Regular expressions for pattern matching
 
 ### Installation
 
 To install the required dependencies, run:
 
 ```bash
-pip install pandas numpy operator itertools
+pip install pandas numpy
 ```
-
-(Note: `operator` and `itertools` are built-in Python modules and do not require installation.)
 
 ## Usage
 ### Python Notebook 
