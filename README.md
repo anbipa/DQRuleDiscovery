@@ -56,15 +56,14 @@ To run the project inside a Docker container, you can follow these steps:
 After building the image, run the following command to start the container. This will mount your local output folder (/Users/anbipa/Desktop/DTIM/Cyclops) to the container’s /app/outputs directory:
 
    ```bash
-   docker run -d -v /path/to/local/outputs:/app/outputs --name dq-container dq-discovery
+   docker run -v /path/to/local/input.csv:/app/data/input.csv -v /path/to/local/outputs:/app/outputs --name dq-container dq-discovery
    ```
    - -d: Runs the container in detached mode (in the background).
-
+   - -v /path/to/local/input.csv:/app/data/input.csv: Mounts the local input.csv file to the container's /app/data/input.csv.
    - -v /path/to/local/outputs:/app/outputs: Mounts the local directory to the container, so the output files will be saved locally.
-
    - --name dq-container: Names the container for easy reference.
-
    - dq-discovery: The Docker image name.
+
 ## Notes
 
 - DCs work with tuple pairs, meaning both time and memory usage scale quadratically.

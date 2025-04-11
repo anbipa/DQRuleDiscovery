@@ -5,7 +5,7 @@ import numpy as np
 from denialconstraints import DenialConstraint
 
 # Dataset initialization
-dataset = "tax500k"
+dataset = "input"
 rowCount = 1 << 11
 
 # Load dataset
