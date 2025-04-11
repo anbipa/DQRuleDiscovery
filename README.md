@@ -26,7 +26,7 @@ pip install pandas numpy operator itertools
 (Note: `operator` and `itertools` are built-in Python modules and do not require installation.)
 
 ## Usage
-
+### Python Notebook 
 1. Clone the repository:
 
    ```bash
@@ -46,6 +46,30 @@ pip install pandas numpy operator itertools
 
 4. Run all cells to extract and analyze Denial Constraints (DCs).
 
+### Docker Setup 
+
+To run the project inside a Docker container, you can follow these steps:
+
+1. **Build the Docker image**:
+
+   In the root directory of the repository, build the Docker image with the following command:
+
+   ```bash
+   docker build -t dq-discovery .
+    ```
+2. **Run the Docker container:**
+After building the image, run the following command to start the container. This will mount your local output folder (/Users/anbipa/Desktop/DTIM/Cyclops) to the container’s /app/outputs directory:
+
+   ```bash
+   docker run -d -v /path/to/local/outputs:/app/outputs --name dq-container dq-discovery
+   ```
+   - -d: Runs the container in detached mode (in the background).
+
+   - -v /path/to/local/outputs:/app/outputs: Mounts the local directory to the container, so the output files will be saved locally.
+
+   - --name dq-container: Names the container for easy reference.
+
+   - dq-discovery: The Docker image name.
 ## Notes
 
 - DCs work with tuple pairs, meaning both time and memory usage scale quadratically.
