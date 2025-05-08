@@ -1,16 +1,17 @@
 FROM python:3.10-slim
 
-WORKDIR /app/src
+WORKDIR /app
 
 # Install dependencies
 COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r /app/requirements.txt
+COPY ./src ./src
+COPY ./api ./api
 
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . /app/
+# Set PYTHONPATH so modules can be found
+ENV PYTHONPATH="${PYTHONPATH}:/app/src"
 
-
-ENV PYTHONPATH=/app/src
-
-# Run the main script from inside src/
-CMD ["python", "main.py"]
+# Run API
+CMD ["uvicorn", "api.api:app", "--host", "0.0.0.0", "--port", "8000"]
