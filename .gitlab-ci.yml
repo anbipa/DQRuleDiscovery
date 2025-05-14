@@ -1,9 +1,17 @@
 stages:
+  - build
   - test
 
-docker-check:
+build-image:
+  stage: build
+  tags:
+    - ubuntu
+  script:
+    - docker build -t dq-discovery .
+
+run-image:
   stage: test
   tags:
     - ubuntu
   script:
-    - docker --version || echo "Docker not installed on this runner"
+    - docker run --rm dq-discovery echo "Container ran successfully!"
