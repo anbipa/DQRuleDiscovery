@@ -5,13 +5,13 @@ stages:
 build-image:
   stage: build
   tags:
-    - ubuntu
+    - dockergood
   script:
     - docker build -t dq-discovery .
 
 run-image:
   stage: test
   tags:
-    - ubuntu
+    - dockergood
   script:
     - docker run --rm dq-discovery echo "Container ran successfully!"
