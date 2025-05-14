@@ -1,8 +1,8 @@
 # main.py
-from dataset import Dataset
-from utils import powerset, y1, y2
+from core.dataset import Dataset
+from core.utils import powerset, y1, y2
 import numpy as np
-from denialconstraints import DenialConstraint
+from core.denialconstraints import DenialConstraint
 
 def discover_dcs(dataset_path, row_count=2048, depth=4):
     # Load dataset

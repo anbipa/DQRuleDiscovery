@@ -25,3 +25,4 @@ def y2():
             mem.append(mem[-1] - 1 / len(mem)**2)
         return mem[n-1]
     return f
+

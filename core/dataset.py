@@ -3,8 +3,8 @@
 import pandas as pd
 import numpy as np
 import re
-from operator_predicate import initialize_operators
-from operator_predicate import Predicate
+from core.operator_predicate import initialize_operators
+from core.operator_predicate import Predicate
 
 
 class Dataset:
