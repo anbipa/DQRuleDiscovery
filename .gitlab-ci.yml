@@ -1,0 +1,9 @@
+stages:
+  - test
+
+docker-check:
+  stage: test
+  tags:
+    - ubuntu
+  script:
+    - docker --version || echo "Docker not installed on this runner"
