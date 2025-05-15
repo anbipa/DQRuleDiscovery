@@ -1,18 +1,6 @@
 stages:
-  - debug
   - build
   - test
-
-
-check-docker-permissions:
-  stage: debug
-  tags:
-    - docker
-  script:
-    - whoami
-    - groups
-    - ls -l /var/run/docker.sock
-    - docker info || echo "Docker not accessible"
 
 
 build-image:
