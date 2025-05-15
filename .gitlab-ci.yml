@@ -9,6 +9,7 @@ build-image:
   script:
     - docker build -t dq-discovery .
 
+
 run-image:
   stage: test
   tags:
