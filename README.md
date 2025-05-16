@@ -76,6 +76,33 @@ After building the image, run the following command to start the container. This
    ```
    - -p: specifies the local:docker ports
 
+Run the following command if Minio is running at port 9000 :
+
+   ```bash
+   docker run -p 5050:5000 \
+   --network long-term-storage_default \
+  -e MINIO_ENDPOINT=minio:9000 \
+  -e MINIO_ACCESS_KEY=minioadmin \
+  -e MINIO_SECRET_KEY=minioadmin123 \
+  dq-discovery
+   ```
+
+3. **Test the API:**
+   You can test the API using a tool like Postman or cURL. Here's an example of how to use cURL to send a POST request with a CSV file:
+
+   ```bash
+   curl -X POST "http://localhost:5050/discover" \
+   -F "file=@/path/to/your/input.csv"
+   ```
+    Replace `/path/to/your/input.csv` with the path to your CSV file.
+
+    If minio is running, use the following command:
+    ```bash
+    curl -X POST http://localhost:5050/discover-from-minio \
+  -H "Content-Type: application/json" \
+  -d '{"bucket": "data-quality-rules-discovery", "object_key": "input.csv"}' 
+    ```
+    Replace `input.csv` with the name of your CSV file in Minio.
    
 
 ## Questions / Contact
