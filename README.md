@@ -7,7 +7,6 @@ This repository contains the code for the Data Quality Rule Discovery tool. It p
 The application currently does not require any mandatory environment variables.
 
 ### Volumes & Persistent Storage
-In future versions, we plan to connect to the LTS external storage in Cyclops.
 The DQRuleDiscovery application does not require any persistent storage or volumes.
 
 ### Network Configuration
