@@ -16,7 +16,7 @@ from botocore.exceptions import BotoCoreError, ClientError
 
 import requests
 from requests.auth import HTTPBasicAuth
-
+import re
 
 # Environment variables (set via Docker)
 MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "minio:9200")
