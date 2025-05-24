@@ -27,6 +27,8 @@ run-image:
   script:
     - echo "Deploying DQRuleDiscovery..."
     - docker pull $IMAGE_REGISTRY
-    - docker run -d --rm --name dqrulediscovery $IMAGE_REGISTRY
+    - docker stop dqrulediscovery || true
+    - docker rm dqrulediscovery || true
+    - docker run -d --rm --name dqrulediscovery -p 5000:5000 $IMAGE_REGISTRY
     - docker ps
 
