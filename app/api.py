@@ -26,8 +26,8 @@ MINIO_SECURE = False  # set to True if using HTTPS
 
 METADATA_MANAGER_ENDPOINT = os.getenv("METADATA_MANAGER_ENDPOINT", "metadata-manager:8080")
 
-AUTH_USER = os.getenv("METADATA_USER", "cyclops")
-AUTH_PASS = os.getenv("METADATA_PASS", "cyclops")
+AUTH_USER = os.getenv("METADATA_USER", "test")
+AUTH_PASS = os.getenv("METADATA_PASS", "test")
 
 app = FastAPI()
 
