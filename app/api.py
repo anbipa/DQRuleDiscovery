@@ -15,6 +15,8 @@ import boto3
 from botocore.exceptions import BotoCoreError, ClientError
 
 import requests
+from requests.auth import HTTPBasicAuth
+
 
 # Environment variables (set via Docker)
 MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "minio:9200")
@@ -22,9 +24,10 @@ MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
 MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minioadmin123")
 MINIO_SECURE = False  # set to True if using HTTPS
 
-METADATA_MANAGER_HOST = os.getenv("METADATA_MANAGER_HOST", "metadata-manager")
-METADATA_MANAGER_PORT = os.getenv("METADATA_MANAGER_PORT", "8080")
+METADATA_MANAGER_ENDPOINT = os.getenv("METADATA_MANAGER_ENDPOINT", "metadata-manager:8080")
 
+AUTH_USER = os.getenv("METADATA_USER", "cyclops")
+AUTH_PASS = os.getenv("METADATA_PASS", "cyclops")
 
 app = FastAPI()
 
@@ -80,8 +83,15 @@ async def discover_from_minio(
 
 @app.post("/discover-and-annotate")
 async def discover_and_annotate(file: UploadFile = File(...)):
-    temp_filename = f"/tmp/{uuid.uuid4()}.csv"
-    dataset_id = str(uuid.uuid4())
+    dataset_id = "dqrulediscovery_annotations"
+
+    # Create annotation_id based on sanitized input filename
+    base_name = os.path.basename(file.filename)
+    name_part = os.path.splitext(base_name)[0]
+    name_clean = re.sub(r"[^a-zA-Z0-9_-]", "", name_part).lower() or "unnamed"
+    annotation_id = f"{name_clean}_{uuid.uuid4().hex[:8]}"
+
+    temp_filename = f"/tmp/{annotation_id}.csv"
 
     try:
         with open(temp_filename, "wb") as buffer:
@@ -90,16 +100,16 @@ async def discover_and_annotate(file: UploadFile = File(...)):
         dc_result = discover_dcs(temp_filename)
 
         payload = {
-            "name": f"Dataset {dataset_id}",
-            "description": "Discovered and annotated by dqrulediscovery",
-            "rules": dc_result
+            "regularDatasetId": name_clean,
+            "denialConstraints": dc_result
         }
 
-        url = f"http://{METADATA_MANAGER_HOST}:{METADATA_MANAGER_PORT}/metadata-manager/annotation-dataset/{dataset_id}"
-        response = requests.put(url, json=payload)
+        url = f"http://{METADATA_MANAGER_ENDPOINT}/metadata-manager/annotation-dataset/{dataset_id}/{annotation_id}"
+        response = requests.put(url, json=payload, auth=HTTPBasicAuth(AUTH_USER, AUTH_PASS))
 
         return {
             "dataset_id": dataset_id,
+            "annotation_id": annotation_id,
             "metadata_manager_status": response.status_code,
             "metadata_manager_response": response.json()
         }
