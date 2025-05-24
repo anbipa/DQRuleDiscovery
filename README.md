@@ -75,7 +75,7 @@ After building the image, run the following command to start the container. This
    ```
    - -p: specifies the local:docker ports
 
-    Run the following command if Minio is running at port 9000 :
+    Run the following command if Minio is running at port 9000 and metadata manager is running at port 8080:
 
    ```bash
    docker run -p 5050:5000 \
@@ -84,6 +84,8 @@ After building the image, run the following command to start the container. This
    -e MINIO_ACCESS_KEY=minioadmin \
    -e MINIO_SECRET_KEY=minioadmin123 \
    dq-discovery
+   
+   docker network connect ontopicsuite_application dq-discovery
    ```
 
 3. **Test the API:**

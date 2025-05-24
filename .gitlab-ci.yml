@@ -29,6 +29,14 @@ run-image:
     - docker pull $IMAGE_REGISTRY
     - docker stop dqrulediscovery || true
     - docker rm dqrulediscovery || true
-    - docker run -d --rm --name dqrulediscovery -p 5000:5000 $IMAGE_REGISTRY
+    - docker run -d \
+      --name dqrulediscovery \
+      --network long-term-storage_default \
+      -p 5000:5000 \
+      -e MINIO_ENDPOINT=minio:9000 \
+      -e MINIO_ACCESS_KEY=minioadmin \
+      -e MINIO_SECRET_KEY=minioadmin123 \
+      $IMAGE_REGISTRY
+      - docker network connect ontopicsuite_application dqrulediscovery
     - docker ps
 
