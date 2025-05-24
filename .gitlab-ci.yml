@@ -1,6 +1,15 @@
 stages:
   - build
-  - test
+  - deploy
+
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+  IMAGE_REGISTRY: registry.gitlab.com/cyclops4100006/dqrulediscovery
+
+before_script:
+  - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
 
 
 build-image:
@@ -8,12 +17,16 @@ build-image:
   tags:
     - docker
   script:
-    - docker build -t dq-discovery .
-
+    - docker build -t $IMAGE_REGISTRY .
+    - docker push $IMAGE_REGISTRY
 
 run-image:
-  stage: test
+  stage: deploy
   tags:
     - docker
   script:
-    - docker run --rm dq-discovery echo "Container ran successfully!"
+    - echo "Deploying DQRuleDiscovery..."
+    - docker pull $IMAGE_REGISTRY
+    - docker run -d --rm --name dqrulediscovery $IMAGE_REGISTRY
+    - docker ps
+
