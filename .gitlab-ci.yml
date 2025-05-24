@@ -37,6 +37,6 @@ run-image:
       -e MINIO_ACCESS_KEY=minioadmin \
       -e MINIO_SECRET_KEY=minioadmin123 \
       $IMAGE_REGISTRY
-      - docker network connect ontopicsuite_application dqrulediscovery
+    - docker network connect ontopicsuite_application dqrulediscovery
     - docker ps
 
