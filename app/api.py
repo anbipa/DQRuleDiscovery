@@ -174,4 +174,4 @@ async def discover_all_and_annotate(file: UploadFile = File(...)):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=6000)
+    uvicorn.run(app, host="0.0.0.0", port=5000)
