@@ -1,7 +1,11 @@
 # dataset.py
+import os
 
 import pandas as pd
 import numpy as np
+import pyarrow.parquet as pq
+import warnings
+
 import re
 from core.operator_predicate import initialize_operators
 from core.operator_predicate import Predicate
@@ -9,19 +13,69 @@ from core.operator_predicate import Predicate
 
 class Dataset:
     def __init__(self, file, **args):
-        self.columns = pd.read_csv(file, nrows=0).columns
-        self.header = [re.match(r'([^\(\)]*)(?:\(| )([^\(\)]*)\)?', col) for col in self.columns]
-        self.names = [match[1] for match in self.header]
-        typeMap = {'String': str, 'Integer': float, 'Int': float, 'Double': float, 'int': float, 'str': str,
-                   'float': float}
-        self.types = {col: typeMap[match[2]] for col, match in zip(self.columns, self.header)}
+        ext = os.path.splitext(file)[-1].lower()
+        if ext == ".csv":
+            self.columns = pd.read_csv(file, nrows=0).columns
+            self.header = [re.match(r'([^\(\)]*)(?:\(| )([^\(\)]*)\)?', col) for col in self.columns]
+            self.names = [match[1] for match in self.header]
+            typeMap = {'String': str, 'Integer': float, 'Int': float, 'Double': float, 'int': float, 'str': str,
+                       'float': float}
+            self.types = {col: typeMap[match[2]] for col, match in zip(self.columns, self.header)}
 
-        self.df = pd.read_csv(file, **args, dtype=self.types)
-        for i, col in enumerate(self.columns):
-            self.df[col] = self.df[col].astype(self.types[col])
+            self.df = pd.read_csv(file, **args, dtype=self.types)
+            for i, col in enumerate(self.columns):
+                self.df[col] = self.df[col].astype(self.types[col])
 
-        operatorMap, _, _ = initialize_operators() # Added
-        self.eq, self.ne, self.ge, self.le, self.gt, self.lt = operatorMap.values() # Added
+        elif ext == ".parquet":
+            df = pq.read_table(file).to_pandas().iloc[:2048]
+
+            def is_all_integers(series):
+                return all((x == int(x)) for x in series.dropna())
+
+            def infer_series_type(s):
+                numeric = pd.to_numeric(s, errors="coerce")
+                if numeric.notna().sum() > 0:
+                    if is_all_integers(numeric):
+                        return numeric.astype("Int64")
+                    else:
+                        return numeric.astype("Float64")
+
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    datetime = pd.to_datetime(s, errors="coerce")
+                if datetime.notna().sum() > 0 and datetime.notna().sum() >= len(s) * 0.5:
+                    return datetime
+
+                return s
+
+            for col in df.columns:
+                df[col] = infer_series_type(df[col])
+
+            def map_dtype_to_pytype(dtype):
+                if pd.api.types.is_string_dtype(dtype):
+                    return str
+                elif pd.api.types.is_integer_dtype(dtype):
+                    return int
+                elif pd.api.types.is_float_dtype(dtype):
+                    return float
+                elif pd.api.types.is_bool_dtype(dtype):
+                    return bool
+                elif pd.api.types.is_datetime64_any_dtype(dtype):
+                    return pd.Timestamp
+                else:
+                    return object
+
+            self.df = df
+            self.columns = df.columns
+            self.header = [[col, str(df[col].dtype)] for col in self.columns]
+            self.names = list(self.columns)
+            self.types = {col: map_dtype_to_pytype(df[col].dtype) for col in self.columns}
+
+        else:
+            raise ValueError(f"Unsupported file extension: {ext}")
+
+        operatorMap, _, _ = initialize_operators()  # Added
+        self.eq, self.ne, self.ge, self.le, self.gt, self.lt = operatorMap.values()  # Added
 
     def randRows(self, n):
         ids = np.random.randint(0, len(self.df), n)

@@ -18,8 +18,10 @@ import requests
 from requests.auth import HTTPBasicAuth
 import re
 
+from core.unique_dc_discovery import discover_unique_constraints
+
 # Environment variables (set via Docker)
-MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "minio:9200")
+MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "localhost:9200")
 MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
 MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minioadmin123")
 MINIO_SECURE = False  # set to True if using HTTPS
@@ -31,8 +33,8 @@ AUTH_PASS = os.getenv("METADATA_PASS", "test")
 
 app = FastAPI()
 
-@app.post("/discover")
-async def discover(file: UploadFile = File(...)):
+@app.post("/discover-all")
+async def discover_all(file: UploadFile = File(...)):
     temp_filename = f"/tmp/{uuid.uuid4()}.csv"
     with open(temp_filename, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
@@ -50,9 +52,29 @@ async def discover(file: UploadFile = File(...)):
         if os.path.exists(temp_filename):
             os.remove(temp_filename)
 
+@app.post("/discover-unique")
+async def discover_unique(file: UploadFile = File(...)):
+    temp_filename = f"/tmp/{uuid.uuid4()}.csv"
+    with open(temp_filename, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
 
-@app.post("/discover-from-minio")
-async def discover_from_minio(
+    try:
+        result = discover_unique_constraints(temp_filename)
+        return {"denial_constraints": result}
+    except Exception as e:
+        traceback.print_exc()
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)}
+        )
+    finally:
+        if os.path.exists(temp_filename):
+            os.remove(temp_filename)
+
+
+
+@app.post("/discover-all-from-minio")
+async def discover_all_from_minio(
     bucket: str = Body(...),
     object_key: str = Body(...)
 ):
@@ -80,9 +102,38 @@ async def discover_from_minio(
         if 'tmp_file_path' in locals() and os.path.exists(tmp_file_path):
             os.remove(tmp_file_path)
 
+@app.post("/discover-unique-from-minio")
+async def discover_unique_from_minio(
+    bucket: str = Body(...),
+    object_key: str = Body(...)
+):
+    try:
+        file_ext = os.path.splitext(object_key)[-1]
+        with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as tmp_file:
+            s3 = boto3.client(
+                "s3",
+                endpoint_url=f"http{'s' if MINIO_SECURE else ''}://{MINIO_ENDPOINT}",
+                aws_access_key_id=MINIO_ACCESS_KEY,
+                aws_secret_access_key=MINIO_SECRET_KEY,
+            )
+            s3.download_fileobj(bucket, object_key, tmp_file)
+            tmp_file_path = tmp_file.name
 
-@app.post("/discover-and-annotate")
-async def discover_and_annotate(file: UploadFile = File(...)):
+        result = discover_unique_constraints(tmp_file_path)
+        return {"denial_constraints": result}
+
+    except (BotoCoreError, ClientError) as e:
+        traceback.print_exc()
+        return JSONResponse(status_code=500, content={"error": f"MinIO error: {str(e)}"})
+    except Exception as e:
+        traceback.print_exc()
+        return JSONResponse(status_code=500, content={"error": str(e)})
+    finally:
+        if 'tmp_file_path' in locals() and os.path.exists(tmp_file_path):
+            os.remove(tmp_file_path)
+
+@app.post("/discover-all-and-annotate")
+async def discover_all_and_annotate(file: UploadFile = File(...)):
     dataset_id = "dqrulediscovery_annotations"
 
     # Create annotation_id based on sanitized input filename
@@ -123,4 +174,4 @@ async def discover_and_annotate(file: UploadFile = File(...)):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=5000)
+    uvicorn.run(app, host="0.0.0.0", port=6000)

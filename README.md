@@ -80,7 +80,7 @@ After building the image, run the following command to start the container. This
    ```bash
    docker run -p 5050:5000 \
    --network long-term-storage_default \
-   -e MINIO_ENDPOINT=minio:9000 \
+   -e MINIO_ENDPOINT=minio:9200 \
    -e MINIO_ACCESS_KEY=minioadmin \
    -e MINIO_SECRET_KEY=minioadmin123 \
    dq-discovery

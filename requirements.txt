@@ -5,3 +5,4 @@ uvicorn
 python-multipart
 boto3
 requests
+pyarrow
