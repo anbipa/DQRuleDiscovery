@@ -4,7 +4,7 @@ from core.utils import powerset, y1, y2
 import numpy as np
 from core.denialconstraints import DenialConstraint
 
-def discover_dcs(dataset_path, row_count=2048, depth=4):
+def discover_dcs(dataset_path, row_count=2048, depth=3):
     # Load dataset
     ds = Dataset(dataset_path, nrows=row_count, encoding='unicode_escape')
 
